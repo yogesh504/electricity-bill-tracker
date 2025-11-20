@@ -1,0 +1,8 @@
+Update this file with the view-only link to the public repository once it is available.
+
+Example format:
+GitHub: https://github.com/<your-handle>/<repo-name>
+Access: View-only (no collaborator permissions granted)
+
+Last updated: (add date)
+
