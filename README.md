@@ -2,8 +2,6 @@
 
 Smart web app to log household energy readings, analyze costs, and spot trends with monthly/appliance summaries.
 
-- Live site: https://YOUR-NETLIFY-SITE.netlify.app
-- Backend API: https://YOUR-BACKEND-HOST.com
 - Demo video (3–6 min): https://YOUR-DEMO-LINK
 - Repository: https://github.com/yogesh504/electricity-bill-tracker
 
