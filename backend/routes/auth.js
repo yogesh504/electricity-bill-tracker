@@ -5,7 +5,13 @@ const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
 
 const router = express.Router();
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// Initialize Google OAuth client with validation
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+if (!GOOGLE_CLIENT_ID) {
+  console.error('WARNING: GOOGLE_CLIENT_ID environment variable is not set!');
+}
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 router.post("/signup", async (req, res) => {
   try {
@@ -72,14 +78,32 @@ router.post("/login", async (req, res) => {
 
 router.post("/google", async (req, res) => {
   try {
+    // Check if Google Client ID is configured
+    if (!GOOGLE_CLIENT_ID) {
+      return res.status(500).json({ 
+        message: "Google OAuth not configured", 
+        error: "GOOGLE_CLIENT_ID environment variable is missing" 
+      });
+    }
+
     const { credential } = req.body;
     if (!credential)
       return res.status(400).json({ message: "No credential provided" });
 
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    // Verify the Google token
+    let ticket;
+    try {
+      ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: GOOGLE_CLIENT_ID,
+      });
+    } catch (verifyError) {
+      console.error('Google token verification error:', verifyError);
+      return res.status(400).json({ 
+        message: "Invalid Google token", 
+        error: verifyError.message 
+      });
+    }
 
     const payload = ticket.getPayload();
     const email = payload?.email;
@@ -118,9 +142,15 @@ router.post("/google", async (req, res) => {
       },
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Google login failed", error: err.message });
+    console.error('Google login error:', err);
+    // Provide more detailed error information
+    const errorMessage = err.message || 'Unknown error';
+    const errorDetails = {
+      message: "Google login failed",
+      error: errorMessage,
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    };
+    res.status(500).json(errorDetails);
   }
 });
 
