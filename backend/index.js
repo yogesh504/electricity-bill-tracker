@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 dotenv.config();
 
 const app = express();
+// CORS - allow all origins (you can restrict this later for security)
 app.use(cors());
 app.use(express.json());
 
@@ -19,6 +20,17 @@ mongoose
 
 app.get('/', (req, res) => {
   res.json({ message: 'Electricity Bill Tracker API running' });
+});
+
+// API base route
+app.get('/api', (req, res) => {
+  res.json({ 
+    message: 'Electricity Bill Tracker API',
+    endpoints: {
+      auth: '/api/auth',
+      readings: '/api/readings'
+    }
+  });
 });
 
 app.use('/api/auth', require('./routes/auth'));

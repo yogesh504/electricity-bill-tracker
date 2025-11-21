@@ -1,15 +1,20 @@
 import axios from "axios";
 
-// Get API base URL from environment variable
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://electricity-bill-tracker.onrender.com/api";
+// Get API base URL from environment variable and trim whitespace
+const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL || "https://electricity-bill-tracker.onrender.com/api").trim();
+
+// Remove trailing slash if present (but keep /api)
+const cleanApiUrl = API_BASE_URL.endsWith('/') && API_BASE_URL !== 'https://electricity-bill-tracker.onrender.com/api/' 
+  ? API_BASE_URL.slice(0, -1) 
+  : API_BASE_URL;
 
 // Log API URL in development to help debug
 if (process.env.NODE_ENV === 'development') {
-  console.log('API Base URL:', API_BASE_URL);
+  console.log('API Base URL:', cleanApiUrl);
 }
 
 const API = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: cleanApiUrl,
 });
 
 API.interceptors.request.use((config) => {
