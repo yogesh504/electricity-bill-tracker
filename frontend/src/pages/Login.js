@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../api";
 import { useAuth } from "../context/AuthContext";
@@ -12,18 +12,21 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const hasGoogleClientId = !!process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
-  const handleGoogleSuccess = async (response) => {
-    setError("");
-    try {
-      const res = await API.post("/auth/google", {
-        credential: response.credential,
-      });
-      login(res.data.user, res.data.token);
-      navigate("/");
-    } catch (err) {
-      setError(err.response?.data?.message || "Google login failed");
-    }
-  };
+  const handleGoogleSuccess = useCallback(
+    async (response) => {
+      setError("");
+      try {
+        const res = await API.post("/auth/google", {
+          credential: response.credential,
+        });
+        login(res.data.user, res.data.token);
+        navigate("/");
+      } catch (err) {
+        setError(err.response?.data?.message || "Google login failed");
+      }
+    },
+    [login, navigate]
+  );
 
   useEffect(() => {
     const initializeGoogle = () => {
@@ -58,7 +61,8 @@ export default function Login() {
     }
 
     initializeGoogle();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handleGoogleSuccess]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

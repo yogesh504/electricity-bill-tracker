@@ -1,10 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useSettings } from "../context/SettingsContext";
 
 export default function Layout({ title, children }) {
   const { user, logout } = useAuth();
-  const { settings } = useSettings();
   const location = useLocation();
 
   const links = [
