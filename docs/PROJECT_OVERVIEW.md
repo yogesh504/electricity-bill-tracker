@@ -3,7 +3,7 @@
 
 
 ```
-Demo video link: https://electricity-bill-tracker.netlify.app/
+Demo video link: https://drive.google.com/file/d/1bx1eZ32fE8d8xvVl1oyekGjkoB446mxu/view?usp=drive_link 
 
 ```
 
@@ -27,6 +27,7 @@ Demo video link: https://electricity-bill-tracker.netlify.app/
   API -->|CRUD| Readings
   API -->|Auth| Users
 ```
+
 
 - **Frontend (React):** Handles routing, auth context, forms, analytics visualizations, and calls the API through `src/api.js`.
 - **Backend (Express + MongoDB):** Exposes `/api/auth` and `/api/readings` endpoints, performs validation, authentication, analytics aggregation, and persistence.
