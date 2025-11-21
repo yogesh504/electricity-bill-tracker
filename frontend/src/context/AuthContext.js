@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
 
       try {
         // Try to fetch user data to verify token
-        const res = await API.get('/readings');
+        await API.get('/readings');
         // If successful, token is valid - but we don't have user data from this endpoint
         // So we'll keep the token and let the app work
         // The user will be set when they login
