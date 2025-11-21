@@ -2,7 +2,7 @@
 
 Smart web app to log household energy readings, analyze costs, and spot trends with monthly/appliance summaries.
 
-- Demo video (3–6 min): https://YOUR-DEMO-LINK
+- Demo video (3–6 min):https://drive.google.com/file/d/1bx1eZ32fE8d8xvVl1oyekGjkoB446mxu/view?usp=drive_link 
 - Repository: https://github.com/yogesh504/electricity-bill-tracker
 
 > 📌 Full submission details (tech stack, architecture, setup, features, impact, next steps) live in `docs/PROJECT_OVERVIEW.md`.
