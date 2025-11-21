@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://electricity-bill-tracker.onrender.com/api",
+  baseURL: process.env.REACT_APP_API_BASE_URL || "https://electricity-bill-tracker.onrender.com/api",
 });
 
 API.interceptors.request.use((config) => {
