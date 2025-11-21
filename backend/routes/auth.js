@@ -19,18 +19,58 @@ router.post("/signup", async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: "Email and password required" });
 
-    const existing = await User.findOne({ email });
+    let existing;
+    try {
+      existing = await User.findOne({ email });
+    } catch (dbError) {
+      console.error('Database error finding existing user:', dbError);
+      return res.status(500).json({ 
+        message: "Database error", 
+        error: dbError.message,
+        hint: "Check MongoDB connection"
+      });
+    }
+
     if (existing)
       return res.status(400).json({ message: "Email already registered" });
 
-    const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, password: hashed });
+    let hashed;
+    try {
+      hashed = await bcrypt.hash(password, 10);
+    } catch (bcryptError) {
+      console.error('Bcrypt hash error:', bcryptError);
+      return res.status(500).json({ 
+        message: "Password hashing error", 
+        error: bcryptError.message 
+      });
+    }
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET || "changeme",
-      { expiresIn: "7d" }
-    );
+    let user;
+    try {
+      user = await User.create({ email, password: hashed });
+    } catch (createError) {
+      console.error('User creation error:', createError);
+      return res.status(500).json({ 
+        message: "User creation error", 
+        error: createError.message 
+      });
+    }
+
+    let token;
+    try {
+      token = jwt.sign(
+        { id: user._id },
+        process.env.JWT_SECRET || "changeme",
+        { expiresIn: "7d" }
+      );
+    } catch (jwtError) {
+      console.error('JWT signing error:', jwtError);
+      return res.status(500).json({ 
+        message: "Token generation error", 
+        error: jwtError.message 
+      });
+    }
+
     res.json({
       token,
       user: {
@@ -41,7 +81,12 @@ router.post("/signup", async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error('Signup error:', err);
+    res.status(500).json({ 
+      message: "Server error", 
+      error: err.message,
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
   }
 });
 
@@ -51,17 +96,58 @@ router.post("/login", async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: "Email and password required" });
 
-    const user = await User.findOne({ email });
+    // Check if user exists
+    let user;
+    try {
+      user = await User.findOne({ email });
+    } catch (dbError) {
+      console.error('Database error finding user:', dbError);
+      return res.status(500).json({ 
+        message: "Database error", 
+        error: dbError.message,
+        hint: "Check MongoDB connection"
+      });
+    }
+
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
-    const match = await bcrypt.compare(password, user.password);
+    // Check if user has a password (for Google-only users)
+    if (!user.password) {
+      return res.status(400).json({ 
+        message: "This account was created with Google. Please use Google Sign-In." 
+      });
+    }
+
+    // Compare passwords
+    let match;
+    try {
+      match = await bcrypt.compare(password, user.password);
+    } catch (bcryptError) {
+      console.error('Bcrypt error:', bcryptError);
+      return res.status(500).json({ 
+        message: "Password verification error", 
+        error: bcryptError.message 
+      });
+    }
+
     if (!match) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET || "changeme",
-      { expiresIn: "7d" }
-    );
+    // Generate JWT token
+    let token;
+    try {
+      token = jwt.sign(
+        { id: user._id },
+        process.env.JWT_SECRET || "changeme",
+        { expiresIn: "7d" }
+      );
+    } catch (jwtError) {
+      console.error('JWT signing error:', jwtError);
+      return res.status(500).json({ 
+        message: "Token generation error", 
+        error: jwtError.message 
+      });
+    }
+
     res.json({
       token,
       user: {
@@ -72,7 +158,12 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error('Login error:', err);
+    res.status(500).json({ 
+      message: "Server error", 
+      error: err.message,
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
   }
 });
 

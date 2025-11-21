@@ -33,6 +33,35 @@ app.get('/api', (req, res) => {
   });
 });
 
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    // Check MongoDB connection
+    const mongoose = require('mongoose');
+    const mongoStatus = mongoose.connection.readyState;
+    const mongoStates = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting'
+    };
+
+    res.json({
+      status: 'ok',
+      mongodb: {
+        status: mongoStates[mongoStatus] || 'unknown',
+        connected: mongoStatus === 1
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      error: err.message
+    });
+  }
+});
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/readings', require('./routes/readings'));
 
