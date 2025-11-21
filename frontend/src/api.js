@@ -1,7 +1,15 @@
 import axios from "axios";
 
+// Get API base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://electricity-bill-tracker.onrender.com/api";
+
+// Log API URL in development to help debug
+if (process.env.NODE_ENV === 'development') {
+  console.log('API Base URL:', API_BASE_URL);
+}
+
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || "https://electricity-bill-tracker.onrender.com/api",
+  baseURL: API_BASE_URL,
 });
 
 API.interceptors.request.use((config) => {
@@ -10,10 +18,30 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 errors globally - clear invalid tokens
+// Handle errors globally
 API.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Log error details for debugging
+    if (error.response) {
+      // Server responded with error
+      console.error('API Error:', {
+        status: error.response.status,
+        data: error.response.data,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+      });
+    } else if (error.request) {
+      // Request made but no response (network error, CORS, etc.)
+      console.error('Network Error:', {
+        message: error.message,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+      });
+    } else {
+      console.error('Error:', error.message);
+    }
+
     if (error.response?.status === 401) {
       // Clear invalid token
       localStorage.removeItem("token");

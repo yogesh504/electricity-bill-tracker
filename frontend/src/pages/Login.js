@@ -29,7 +29,12 @@ export default function Login() {
         login(res.data.user, res.data.token);
         navigate("/");
       } catch (err) {
-        setError(err.response?.data?.message || "Google login failed");
+        console.error("Google login error:", err);
+        const errorMessage = err.response?.data?.message || 
+                           err.response?.data?.error || 
+                           err.message || 
+                           "Google login failed";
+        setError(errorMessage);
       }
     },
     [login, navigate]
@@ -111,7 +116,12 @@ export default function Login() {
       login(res.data.user, res.data.token);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      console.error("Login error:", err);
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error || 
+                          err.message || 
+                          (err.response?.status === 500 ? "Server error - check backend logs" : "Login failed");
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
