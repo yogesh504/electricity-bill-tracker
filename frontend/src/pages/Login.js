@@ -5,12 +5,19 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, token } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const hasGoogleClientId = !!process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (token) {
+      navigate("/");
+    }
+  }, [token, navigate]);
 
   const handleGoogleSuccess = useCallback(
     async (response) => {
@@ -29,40 +36,67 @@ export default function Login() {
   );
 
   useEffect(() => {
+    if (!hasGoogleClientId) return;
+
     const initializeGoogle = () => {
       if (!window.google || !process.env.REACT_APP_GOOGLE_CLIENT_ID) return;
 
-      window.google.accounts.id.initialize({
-        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-        callback: handleGoogleSuccess,
-      });
-
-      const container = document.getElementById("google-signin-button");
-      if (container) {
-        window.google.accounts.id.renderButton(container, {
-          theme: "outline",
-          size: "large",
-          width: "100%",
+      try {
+        window.google.accounts.id.initialize({
+          client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+          callback: handleGoogleSuccess,
         });
+
+        const container = document.getElementById("google-signin-button");
+        if (container) {
+          // Clear container first to avoid duplicate buttons
+          container.innerHTML = "";
+          window.google.accounts.id.renderButton(container, {
+            theme: "outline",
+            size: "large",
+            width: "100%",
+          });
+        }
+      } catch (err) {
+        console.error("Error initializing Google Sign-In:", err);
       }
     };
 
-    if (!window.google) {
-      const script = document.createElement("script");
+    // Check if script already exists
+    let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    
+    if (!script) {
+      script = document.createElement("script");
       script.src = "https://accounts.google.com/gsi/client";
       script.async = true;
       script.defer = true;
       script.onload = initializeGoogle;
-      document.head.appendChild(script);
-
-      return () => {
-        document.head.removeChild(script);
+      script.onerror = () => {
+        console.error("Failed to load Google Sign-In script");
       };
+      document.head.appendChild(script);
+    } else if (window.google) {
+      // Script already loaded, initialize immediately
+      initializeGoogle();
+    } else {
+      // Script exists but not loaded yet, wait for it
+      script.onload = initializeGoogle;
     }
 
-    initializeGoogle();
+    // If Google is already available, initialize immediately
+    if (window.google) {
+      initializeGoogle();
+    }
+
+    return () => {
+      // Cleanup: remove button but keep script (it might be used elsewhere)
+      const container = document.getElementById("google-signin-button");
+      if (container) {
+        container.innerHTML = "";
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handleGoogleSuccess]);
+  }, [handleGoogleSuccess, hasGoogleClientId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
