@@ -1,16 +1,11 @@
 ## Repository & Demo Deliverables
 
-- **View-only repo link:** Update `docs/REPO_LINK.txt` with your public GitHub/GitLab URL once the repo is created.
-- **Demo video (3–6 min):** Record a walkthrough covering the problem, solution, UX tour, and key takeaways. Upload it (Drive, YouTube unlisted, etc.) and place the share link below.
+
 
 ```
-Demo video link: https://your-demo-link-here
-Notes: recorded with OBS Studio, 1080p, ~4 min
+Demo video link: https://electricity-bill-tracker.netlify.app/
+
 ```
-
-Reference video for structure: https://www.youtube.com/watch?v=B8ntYrwdbfA&t=47s
-
----
 
 ## Tech Stack
 
@@ -25,24 +20,6 @@ Reference video for structure: https://www.youtube.com/watch?v=B8ntYrwdbfA&t=47s
 | Hosting    | Netlify (frontend), Render/Vercel/Railway/Render for backend |
 
 ---
-
-## Architecture Overview
-
-```mermaid
-flowchart LR
-  subgraph Netlify
-    ReactApp[React Frontend]
-  end
-
-  subgraph Backend
-    API[Express API]
-    Auth[Auth Middleware]
-  end
-
-  subgraph MongoDB
-    Users[(Users Collection)]
-    Readings[(Readings Collection)]
-  end
 
   ReactApp -->|HTTPS (Axios)| API
   API -->|JWT verify| Auth
@@ -141,8 +118,8 @@ Never commit `.env` files; only share `.env.example`.
 - **Live URLs:** Document frontend URL, backend API URL, and demo video link inside this section once live.
 
 ```
-Frontend (Netlify): https://your-netlify-site.netlify.app
-Backend API: https://your-backend-host.com
+Frontend (Netlify): https://electricity-bill-tracker.netlify.app/
+Backend API: https://electricity-bill-tracker.onrender.com/
 ```
 
 ---
